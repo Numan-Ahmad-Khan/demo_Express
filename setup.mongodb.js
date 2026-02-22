@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const mongoURL = 'mongodb+srv://<Username>:<Password>@cluster0.ntvqvow.mongodb.net/newDB'
+const mongoURL = 'mongodb+srv://username:password@cluster0.ntvqvow.mongodb.net/newDB'
 
 const connectDB = async()=>{
     try{

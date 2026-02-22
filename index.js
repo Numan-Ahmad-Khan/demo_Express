@@ -3,7 +3,7 @@ const app = express();
 const { default: mongoose } = require("mongoose");
 const connectDB =  require("./setup.mongodb")
 const port = '3000'
-
+const z = require("zod")
 connectDB();
 
 const userSchema = new mongoose.Schema({
@@ -15,6 +15,15 @@ const userSchema = new mongoose.Schema({
 });
 const mongoDB = mongoose.model(`mongoDB`, userSchema, "express");
 
+const validationCreate = z.object({
+  name :z.string(),
+  status : z.boolean()
+})
+const validationUpdate = validationCreate.partial().refine(
+  (data) => Object.keys(data).length > 0,
+  { message: "At least one field must be provided" }
+);
+
 app.use(express.json())
 app.get("/users", async(req, res)=>{
     const users = await mongoDB.find()
@@ -24,9 +33,13 @@ app.get("/users", async(req, res)=>{
 
 app.post("/users", async (req, res) => {
   try {
-    const { name, status } = req.body;
-
-    const user = await mongoDB.create({ name, status });
+    const result = validationCreate.safeParse(req.body);
+    if(!result.success){
+      return res.status(400).json({
+        message : 'Error: validation failed, schema not followed'
+      })
+    }
+    const user = await mongoDB.create( result.data );
 
     res.status(201).json({
       message: "User created successfully",
@@ -47,7 +60,13 @@ app.delete("/users/delete/:id", async (req, res) => {
 
 app.put("/users/update/:id", async (req, res) => {
     const { id } = req.params;
-    const updateUser = await mongoDB.findByIdAndUpdate(id, req.body)
+    const result = validationUpdate.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        message: "Error: validation failed, schema not followed",
+      });
+    }
+    const updateUser = await mongoDB.findByIdAndUpdate(id, result.data)
 
   res.json({message: "Updated successfully"})
 });

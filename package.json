@@ -14,7 +14,8 @@
   "dependencies": {
     "express": "^5.2.1",
     "mongoose": "^9.1.6",
-    "save-dev": "^0.0.1-security"
+    "save-dev": "^0.0.1-security",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
